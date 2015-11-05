@@ -366,4 +366,8 @@ public class AccountHeader {
          */
         public boolean onClick(View view, IProfile profile);
     }
+
+    public void updateImages(){
+        mAccountHeaderBuilder.updateHeaderAndList();
+    }
 }
