@@ -10,6 +10,7 @@ import com.mikepenz.materialdrawer.model.interfaces.Selectable;
 import com.mikepenz.materialdrawer.util.RecyclerViewCacheUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -65,6 +66,19 @@ public abstract class BaseDrawerAdapter extends RecyclerView.Adapter<RecyclerVie
         }
     }
 
+    public void addDrawerItems(int position, IDrawerItem... drawerItems) {
+        if (drawerItems != null) {
+            mDrawerItems.addAll(position, Arrays.asList(drawerItems));
+            mapPossibleTypes(mDrawerItems);
+            notifyItemRangeInserted(position + 1, drawerItems.length);
+
+            //fix wrong remembered position
+            if (position < previousSelection) {
+                previousSelection = previousSelection + drawerItems.length;
+            }
+        }
+    }
+
     public void setDrawerItem(int position, IDrawerItem drawerItem) {
         mDrawerItems.set(position - getHeaderItemCount(), drawerItem);
         mapPossibleType(drawerItem);
@@ -81,17 +95,30 @@ public abstract class BaseDrawerAdapter extends RecyclerView.Adapter<RecyclerVie
         mDrawerItems.add(position - getHeaderItemCount(), drawerItem);
         mapPossibleType(drawerItem);
         notifyItemInserted(position);
+
+        //fix wrong remembered position
+        if (position < previousSelection) {
+            previousSelection = previousSelection + 1;
+        }
     }
 
     public void removeDrawerItem(int position) {
         mDrawerItems.remove(position - getHeaderItemCount());
         notifyItemRemoved(position);
+
+        //fix wrong remembered position
+        if (position < previousSelection) {
+            previousSelection = previousSelection - 1;
+        }
     }
 
     public void clearDrawerItems() {
         int count = mDrawerItems.size();
         mDrawerItems.clear();
         notifyItemRangeRemoved(getHeaderItemCount(), count);
+
+        //fix wrong remembered position
+        previousSelection = -1;
     }
 
     public void clearHeaderItems() {
