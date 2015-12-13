@@ -53,7 +53,7 @@ You can find some frequently asked questions and other resources in the [WIKI / 
 ##1. Provide the gradle dependency
 
 ```gradle
-compile('com.mikepenz:materialdrawer:4.5.3@aar') {
+compile('com.mikepenz:materialdrawer:4.5.8@aar') {
 	transitive = true
 }
 ```
@@ -172,7 +172,7 @@ compile 'com.mikepenz:fontawesome-typeface:x.y.z@aar'     //FontAwesome
 ```
 
 **java**
-```
+```java
 //now you can simply use any icon of the Google Material Icons font
 new PrimaryDrawerItem().withIcon(GoogleMaterial.Icon.gmd_wb_sunny)
 //Or an icon from FontAwesome
@@ -410,6 +410,7 @@ builder.withDrawerLayout(R.layout.material_drawer);
 * [+UEA](https://play.google.com/store/apps/details?id=br.edu.uea.app)
 * [PixCell8](https://play.google.com/store/apps/details?id=com.pixcell8.prod)
 * [TS3 Viewer for TeamSpeak 3](https://play.google.com/store/apps/details?id=com.game_state.ts3viewer)
+* [Teacher Gradebook](https://play.google.com/store/apps/details?id=com.apolosoft.cuadernoprofesor)
 
 
 #Articles about the MaterialDrawer
@@ -425,7 +426,9 @@ builder.withDrawerLayout(R.layout.material_drawer);
 
 #Developed By
 
-* Mike Penz - http://mikepenz.com - <mikepenz@gmail.com>
+* Mike Penz 
+ * [mikepenz.com](http://mikepenz.com) - <mikepenz@gmail.com>
+ * [paypal.me/mikepenz](http://paypal.me/mikepenz)
 
 
 #License

@@ -375,13 +375,23 @@ public class Drawer {
     }
 
     /**
-     * return sthe DrawerItem by the given identifier
+     * returns the DrawerItem by the given identifier
      *
      * @param identifier
      * @return
      */
     public IDrawerItem getDrawerItem(int identifier) {
         return getAdapter().getItem(getPosition(identifier));
+    }
+
+    /**
+     * returns the found drawerItem by the given tag
+     *
+     * @param tag
+     * @return
+     */
+    public IDrawerItem getDrawerItem(Object tag) {
+        return DrawerUtils.getDrawerItem(getDrawerItems(), tag);
     }
 
     /**
@@ -902,20 +912,20 @@ public class Drawer {
             originalOnDrawerItemLongClickListener = getOnDrawerItemLongClickListener();
             originalDrawerItems = getDrawerItems();
             originalDrawerSelection = getCurrentSelectedPosition();
+        }
 
-            //set the new items
-            setOnDrawerItemClickListener(onDrawerItemClickListener);
-            setOnDrawerItemLongClickListener(onDrawerItemLongClickListener);
-            setItems(drawerItems, true);
-            setSelectionAtPosition(drawerSelection, false);
+        //set the new items
+        setOnDrawerItemClickListener(onDrawerItemClickListener);
+        setOnDrawerItemLongClickListener(onDrawerItemLongClickListener);
+        setItems(drawerItems, true);
+        setSelectionAtPosition(drawerSelection, false);
 
-            //hide stickyFooter and it's shadow
-            if (getStickyFooter() != null) {
-                getStickyFooter().setVisibility(View.GONE);
-            }
-            if (getStickyFooterShadow() != null) {
-                getStickyFooterShadow().setVisibility(View.GONE);
-            }
+        //hide stickyFooter and it's shadow
+        if (getStickyFooter() != null) {
+            getStickyFooter().setVisibility(View.GONE);
+        }
+        if (getStickyFooterShadow() != null) {
+            getStickyFooterShadow().setVisibility(View.GONE);
         }
     }
 

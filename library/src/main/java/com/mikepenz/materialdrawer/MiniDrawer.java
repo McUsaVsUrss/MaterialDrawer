@@ -344,8 +344,7 @@ public class MiniDrawer {
      */
     public void updateItem(int identifier) {
         if (mDrawer != null && mDrawerAdapter != null && mDrawerAdapter.getDrawerItems() != null && identifier != -1) {
-            IDrawerItem drawerItem = mDrawer.getDrawerItem(identifier);
-
+            IDrawerItem drawerItem = DrawerUtils.getDrawerItem(getDrawerItems(), identifier);
             for (int i = 0; i < mDrawerAdapter.getDrawerItems().size(); i++) {
                 if (mDrawerAdapter.getDrawerItems().get(i).getIdentifier() == drawerItem.getIdentifier()) {
                     IDrawerItem miniDrawerItem = generateMiniDrawerItem(drawerItem);
@@ -371,14 +370,9 @@ public class MiniDrawer {
         }
 
         if (mDrawer != null) {
-            if (mDrawer.getDrawerItems() != null) {
-                ArrayList<IDrawerItem> drawerItems = mDrawer.getDrawerItems();
-                if (mDrawer.switchedDrawerContent()) {
-                    drawerItems = mDrawer.getOriginalDrawerItems();
-                }
-
+            if (getDrawerItems() != null) {
                 //migrate to miniDrawerItems
-                for (IDrawerItem drawerItem : drawerItems) {
+                for (IDrawerItem drawerItem : getDrawerItems()) {
                     IDrawerItem miniDrawerItem = generateMiniDrawerItem(drawerItem);
                     if (miniDrawerItem != null) {
                         mDrawerAdapter.addDrawerItem(miniDrawerItem);
@@ -398,10 +392,15 @@ public class MiniDrawer {
                     if (type == ITEM) {
                         //fire the onClickListener also if the specific drawerItem is not Selectable
                         if (item.isSelectable()) {
+                            //make sure we are on the original drawerItemList
+                            if (mAccountHeader != null && mAccountHeader.isSelectionListShown()) {
+                                mAccountHeader.toggleSelectionList(v.getContext());
+                            }
+                            //set the selection
                             mDrawer.setSelection(item, true);
                         } else if (mDrawer.getOnDrawerItemClickListener() != null) {
                             //get the original `DrawerItem` from the Drawer as this one will contain all information
-                            mDrawer.getOnDrawerItemClickListener().onItemClick(v, position, mDrawer.getDrawerItem(item.getIdentifier()));
+                            mDrawer.getOnDrawerItemClickListener().onItemClick(v, position, DrawerUtils.getDrawerItem(getDrawerItems(), item.getIdentifier()));
                         }
                     } else if (type == PROFILE) {
                         if (mAccountHeader != null && !mAccountHeader.isSelectionListShown()) {
@@ -415,7 +414,15 @@ public class MiniDrawer {
             });
         }
         mDrawerAdapter.setOnLongClickListener(mOnMiniDrawerItemLongClickListener);
-
         mRecyclerView.scrollToPosition(0);
+    }
+
+    /**
+     * returns always the original drawerItems and not the switched content
+     *
+     * @return
+     */
+    private ArrayList<IDrawerItem> getDrawerItems() {
+        return mDrawer.getOriginalDrawerItems() != null ? mDrawer.getOriginalDrawerItems() : mDrawer.getDrawerItems();
     }
 }

@@ -7,8 +7,8 @@ android {
     defaultConfig {
         minSdkVersion 10
         targetSdkVersion 23
-        versionCode 453
-        versionName '4.5.3'
+        versionCode 458
+        versionName '4.5.8'
     }
     buildTypes {
         release {
@@ -30,5 +30,5 @@ dependencies {
 
     compile 'com.mikepenz:materialize:0.5.1@aar'
 
-    compile 'com.mikepenz:iconics-core:2.2.1@aar'
+    compile 'com.mikepenz:iconics-core:2.5.1@aar'
 }
