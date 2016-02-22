@@ -28,13 +28,14 @@ There  is a Header with profiles (**AccountHeader**), a **MiniDrawer** for Table
 - based on a **RecyclerView**
 - **RTL** support
 - Gmail like **MiniDrawer**
+- expandable items
 - **badge** support
 - define custom drawer items
 - tested and **stable**
 - sticky footer or headers
 - **absolutely NO limits**
 
-> If you upgrade from < 4.0.0 follow the [MIGRATION GUIDE](https://github.com/mikepenz/MaterialDrawer/blob/develop/MIGRATION.md)
+> If you upgrade from < 5.0.0 follow the [MIGRATION GUIDE](https://github.com/mikepenz/MaterialDrawer/blob/develop/MIGRATION.md)
 
 #Preview
 ##Demo
@@ -51,7 +52,7 @@ You can find some frequently asked questions and other resources in the [WIKI / 
 ##1. Provide the gradle dependency
 
 ```gradle
-compile('com.mikepenz:materialdrawer:4.6.4@aar') {
+compile('com.mikepenz:materialdrawer:5.0.0@aar') {
 	transitive = true
 }
 ```

@@ -20,6 +20,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.mikepenz.fastadapter.utils.IdDistributor;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.materialdrawer.holder.ColorHolder;
 import com.mikepenz.materialdrawer.holder.DimenHolder;
@@ -30,13 +31,13 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerUIUtils;
-import com.mikepenz.materialdrawer.util.IdDistributor;
 import com.mikepenz.materialdrawer.view.BezelImageView;
 import com.mikepenz.materialize.util.UIUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Stack;
 
 /**
@@ -600,7 +601,7 @@ public class AccountHeaderBuilder {
     }
 
     // the profiles to display
-    protected ArrayList<IProfile> mProfiles;
+    protected List<IProfile> mProfiles;
 
     /**
      * set the arrayList of DrawerItems for the drawer
@@ -608,7 +609,7 @@ public class AccountHeaderBuilder {
      * @param profiles
      * @return
      */
-    public AccountHeaderBuilder withProfiles(@NonNull ArrayList<IProfile> profiles) {
+    public AccountHeaderBuilder withProfiles(@NonNull List<IProfile> profiles) {
         this.mProfiles = IdDistributor.checkIds(profiles);
         return this;
     }
@@ -783,7 +784,7 @@ public class AccountHeaderBuilder {
         }
 
         // handle everything if we have a translucent status bar which only is possible on API >= 19
-        if (mTranslucentStatusBar && Build.VERSION.SDK_INT >= 19) {
+        if (mTranslucentStatusBar && Build.VERSION.SDK_INT >= 21) {
             mAccountHeader.setPadding(mAccountHeader.getPaddingLeft(), mAccountHeader.getPaddingTop() + statusBarHeight, mAccountHeader.getPaddingRight(), mAccountHeader.getPaddingBottom());
             //in fact it makes no difference if we have a translucent statusBar or not. we want 9/16 just if we are not compact
             if (mCompactStyle) {
@@ -816,7 +817,7 @@ public class AccountHeaderBuilder {
             mAccountHeaderTextSection = mAccountHeaderContainer.findViewById(R.id.material_drawer_account_header_text_section);
         }
 
-        mAccountHeaderTextSectionBackgroundResource = DrawerUIUtils.getSelectableBackground(mActivity);
+        mAccountHeaderTextSectionBackgroundResource = UIUtils.getSelectableBackgroundRes(mActivity);
         handleSelectionView(mCurrentProfile, true);
 
         // set the arrow :D
@@ -1363,7 +1364,7 @@ public class AccountHeaderBuilder {
                     if (mCurrentHiddenInList) {
                         continue;
                     } else {
-                        selectedPosition = position + mDrawer.getAdapter().getHeaderOffset();
+                        selectedPosition = mDrawer.mDrawerBuilder.getItemAdapter().getGlobalPosition(position);
                     }
                 }
                 if (profile instanceof IDrawerItem) {
@@ -1412,10 +1413,17 @@ public class AccountHeaderBuilder {
 
             //if a custom behavior was chosen via the CloseDrawerOnProfileListClick then use this. else react on the result of the onProfileChanged listener
             if (mCloseDrawerOnProfileListClick != null) {
-                return !mCloseDrawerOnProfileListClick;
-            } else {
-                return consumed;
+                consumed = consumed && !mCloseDrawerOnProfileListClick;
             }
+
+            //totally custom handling of the drawer behavior as otherwise the selection of the profile list is set to the Drawer
+            if (mDrawer != null && !consumed) {
+                //close the drawer after click
+                mDrawer.mDrawerBuilder.closeDrawerDelayed();
+            }
+
+            //consume the event to prevent setting the clicked item as selected in the already switched item list
+            return true;
         }
     };
 
