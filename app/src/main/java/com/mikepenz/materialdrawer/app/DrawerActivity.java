@@ -12,7 +12,6 @@ import android.widget.CompoundButton;
 
 import com.mikepenz.aboutlibraries.Libs;
 import com.mikepenz.aboutlibraries.LibsBuilder;
-import com.mikepenz.fastadapter.IExpandable;
 import com.mikepenz.fastadapter.utils.RecyclerViewCacheUtil;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -90,7 +89,7 @@ public class DrawerActivity extends AppCompatActivity {
                     public boolean onProfileChanged(View view, IProfile profile, boolean current) {
                         //sample usage of the onProfileChanged listener
                         //if the clicked item has the identifier 1 add a new profile ;)
-                        if (profile instanceof IDrawerItem && ((IDrawerItem) profile).getIdentifier() == PROFILE_SETTING) {
+                        if (profile instanceof IDrawerItem && profile.getIdentifier() == PROFILE_SETTING) {
                             int count = 100 + headerResult.getProfiles().size() + 1;
                             IProfile newProfile = new ProfileDrawerItem().withNameShown(true).withName("Batman" + count).withEmail("batman" + count + "@gmail.com").withIcon(R.drawable.profile5).withIdentifier(count);
                             if (headerResult.getProfiles() != null) {
@@ -158,14 +157,6 @@ public class DrawerActivity extends AppCompatActivity {
 
                         if (drawerItem != null) {
                             Intent intent = null;
-
-                            //if our drawer has collapsible items we check if the clicked items has subItem. if yes we open it
-                            if (((IExpandable) drawerItem).getSubItems() != null) {
-                                result.getAdapter().toggleExpandable(position);
-                                //we consume the event and want no further handling
-                                return true;
-                            }
-
                             if (drawerItem.getIdentifier() == 1) {
                                 intent = new Intent(DrawerActivity.this, CompactHeaderDrawerActivity.class);
                             } else if (drawerItem.getIdentifier() == 2) {
