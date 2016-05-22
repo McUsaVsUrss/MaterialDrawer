@@ -126,6 +126,9 @@ public class MiniDrawerItem extends BaseDrawerItem<MiniDrawerItem, MiniDrawerIte
         //set the identifier from the drawerItem here. It can be used to run tests
         viewHolder.itemView.setId(hashCode());
 
+        //set the item enabled if it is
+        viewHolder.itemView.setEnabled(isEnabled());
+
         //set the item selected if it is
         viewHolder.itemView.setSelected(isSelected());
 
@@ -176,7 +179,7 @@ public class MiniDrawerItem extends BaseDrawerItem<MiniDrawerItem, MiniDrawerIte
         }
     }
 
-    protected static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         private View view;
         private ImageView icon;
         private TextView badge;

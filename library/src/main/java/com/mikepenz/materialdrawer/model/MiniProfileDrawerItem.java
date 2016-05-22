@@ -139,6 +139,9 @@ public class MiniProfileDrawerItem extends AbstractDrawerItem<MiniProfileDrawerI
         //set the identifier from the drawerItem here. It can be used to run tests
         viewHolder.itemView.setId(hashCode());
 
+        //set the item enabled if it is
+        viewHolder.itemView.setEnabled(isEnabled());
+
         //set the icon
         ImageHolder.applyToOrSetInvisible(getIcon(), viewHolder.icon);
 
@@ -158,7 +161,7 @@ public class MiniProfileDrawerItem extends AbstractDrawerItem<MiniProfileDrawerI
         }
     }
 
-    protected static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         private ImageView icon;
 
         public ViewHolder(View view) {
