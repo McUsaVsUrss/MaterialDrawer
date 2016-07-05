@@ -18,6 +18,7 @@ import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.view.SupportMenuInflater;
@@ -50,6 +51,7 @@ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.Selectable;
+import com.mikepenz.materialdrawer.util.DrawerUIUtils;
 import com.mikepenz.materialize.Materialize;
 import com.mikepenz.materialize.MaterializeBuilder;
 import com.mikepenz.materialize.util.UIUtils;
@@ -814,7 +816,7 @@ public class DrawerBuilder {
     }
 
     // item to select
-    protected int mSelectedItemIdentifier = 0;
+    protected long mSelectedItemIdentifier = 0;
 
     /**
      * Set this to the identifier of the item, you would love to select upon start
@@ -822,7 +824,7 @@ public class DrawerBuilder {
      * @param selectedItemIdentifier
      * @return
      */
-    public DrawerBuilder withSelectedItem(int selectedItemIdentifier) {
+    public DrawerBuilder withSelectedItem(long selectedItemIdentifier) {
         this.mSelectedItemIdentifier = selectedItemIdentifier;
         return this;
     }
@@ -862,10 +864,23 @@ public class DrawerBuilder {
     }
 
     // an adapter to use for the list
+    protected boolean mPositionBasedStateManagement = true;
     protected FastAdapter<IDrawerItem> mAdapter;
     protected HeaderAdapter<IDrawerItem> mHeaderAdapter = new HeaderAdapter<>();
     protected ItemAdapter<IDrawerItem> mItemAdapter = new ItemAdapter<>();
     protected FooterAdapter<IDrawerItem> mFooterAdapter = new FooterAdapter<>();
+
+    /**
+     * This allows to disable the default position based statemanagment of the FastAdapter and switch to the
+     * new identifier based state managment
+     *
+     * @param positionBasedStateManagement enable / disable the positionBasedStateManagement
+     * @return this
+     */
+    public DrawerBuilder withPositionBasedStateManagement(boolean positionBasedStateManagement) {
+        this.mPositionBasedStateManagement = positionBasedStateManagement;
+        return this;
+    }
 
     /**
      * Define a custom Adapter which will be used in the drawer
@@ -893,6 +908,7 @@ public class DrawerBuilder {
             mAdapter.withSelectable(true);
             mAdapter.withAllowDeselection(false);
             mAdapter.setHasStableIds(mHasStableIds);
+            mAdapter.withPositionBasedStateManagement(mPositionBasedStateManagement);
 
             //we wrap our main Adapter with the item hosting adapter
             mHeaderAdapter.wrap(mItemAdapter.wrap(mFooterAdapter.wrap(mAdapter)));
@@ -1484,7 +1500,7 @@ public class DrawerBuilder {
         //we only want to hook a Drawer to the MiniDrawer if it is the main drawer, not the appended one
         if (!mAppended && mGenerateMiniDrawer) {
             // if we should create a MiniDrawer we have to do this now
-            mMiniDrawer = new MiniDrawer().withDrawer(result).withAccountHeader(mAccountHeader);
+            mMiniDrawer = new MiniDrawer().withDrawer(result).withAccountHeader(mAccountHeader).withPositionBasedStateManagement(mPositionBasedStateManagement);
         }
 
         //forget the reference to the activity
@@ -1564,10 +1580,10 @@ public class DrawerBuilder {
 
         //set the shadow for the drawer
         if (Build.VERSION.SDK_INT < 21 && mDrawerLayout != null) {
-            if (mDrawerGravity == GravityCompat.START) {
-                mDrawerLayout.setDrawerShadow(R.drawable.material_drawer_shadow_right, mDrawerGravity);
+            if (ViewCompat.getLayoutDirection(mRootView) == ViewCompat.LAYOUT_DIRECTION_LTR) {
+                mDrawerLayout.setDrawerShadow(mDrawerGravity == GravityCompat.START ? R.drawable.material_drawer_shadow_right : R.drawable.material_drawer_shadow_left, mDrawerGravity);
             } else {
-                mDrawerLayout.setDrawerShadow(R.drawable.material_drawer_shadow_left, mDrawerGravity);
+                mDrawerLayout.setDrawerShadow(mDrawerGravity == GravityCompat.START ? R.drawable.material_drawer_shadow_left : R.drawable.material_drawer_shadow_right, mDrawerGravity);
             }
         }
 
@@ -1592,7 +1608,11 @@ public class DrawerBuilder {
                 paddingTop = UIUtils.getStatusBarHeight(mActivity);
             }
             int paddingBottom = 0;
-            if (((mTranslucentNavigationBar || mFullscreen) && Build.VERSION.SDK_INT >= 21) && !mSystemUIHidden && mActivity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            int orientation = mActivity.getResources().getConfiguration().orientation;
+            if (((mTranslucentNavigationBar || mFullscreen) && Build.VERSION.SDK_INT >= 21) && !mSystemUIHidden
+                    && (orientation == Configuration.ORIENTATION_PORTRAIT
+                    || (orientation == Configuration.ORIENTATION_LANDSCAPE
+                    && DrawerUIUtils.isSystemBarOnBottom(mActivity)))) {
                 paddingBottom = UIUtils.getNavigationBarHeight(mActivity);
             }
 
@@ -1657,7 +1677,7 @@ public class DrawerBuilder {
         }
 
         //predefine selection (should be the first element
-        if (mSelectedItemPosition == 0 && mSelectedItemIdentifier != 0) {
+        if (mSelectedItemPosition == 0 && mSelectedItemIdentifier != 0L) {
             mSelectedItemPosition = DrawerUtils.getPositionByIdentifier(this, mSelectedItemIdentifier);
         }
         if (mHeaderView != null && mSelectedItemPosition == 0) {

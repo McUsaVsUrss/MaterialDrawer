@@ -103,6 +103,21 @@ public class MiniDrawer {
         return this;
     }
 
+
+    protected boolean mPositionBasedStateManagement = true;
+
+    /**
+     * This allows to disable the default position based statemanagment of the FastAdapter and switch to the
+     * new identifier based state managment
+     *
+     * @param positionBasedStateManagement enable / disable the positionBasedStateManagement
+     * @return this
+     */
+    public MiniDrawer withPositionBasedStateManagement(boolean positionBasedStateManagement) {
+        this.mPositionBasedStateManagement = positionBasedStateManagement;
+        return this;
+    }
+
     private boolean mIncludeSecondaryDrawerItems = false;
 
     /**
@@ -135,23 +150,38 @@ public class MiniDrawer {
      * set to false if you do not want the profile image to toggle to the normal drawers profile selection
      *
      * @param enableProfileClick
-     * @return
+     * @return this
      */
     public MiniDrawer withEnableProfileClick(boolean enableProfileClick) {
         this.mEnableProfileClick = enableProfileClick;
         return this;
     }
 
-    private FastAdapter.OnClickListener<IDrawerItem> mOnMiniDrawerItemClickListener;
+    private OnMiniDrawerItemClickListener mOnMiniDrawerItemClickListener;
 
     /**
-     * Define an onClickListener for the MiniDrawer item adapter. WARNING: this will overwrite the default behavior
+     * Define the onMiniDrawerItemClickListener called before any logic in the MiniDrawer is run, allows you to intercept the default behavior
      *
      * @param onMiniDrawerItemClickListener
-     * @return
+     * @return this
      */
-    public MiniDrawer withOnMiniDrawerItemClickListener(FastAdapter.OnClickListener<IDrawerItem> onMiniDrawerItemClickListener) {
+    public MiniDrawer withOnMiniDrawerItemClickListener(OnMiniDrawerItemClickListener onMiniDrawerItemClickListener) {
         this.mOnMiniDrawerItemClickListener = onMiniDrawerItemClickListener;
+        return this;
+    }
+
+
+    private FastAdapter.OnClickListener<IDrawerItem> mOnMiniDrawerItemOnClickListener;
+
+    /**
+     * Define an onClickListener for the MiniDrawer item adapter. WARNING: this will completely overwrite the default behavior
+     * You may want to check the `OnMiniDrawerItemClickListener` (withOnMiniDrawerItemClickListener) which just hooks into the default behavior
+     *
+     * @param onMiniDrawerItemOnClickListener
+     * @return this
+     */
+    public MiniDrawer withOnMiniDrawerItemOnClickListener(FastAdapter.OnClickListener<IDrawerItem> onMiniDrawerItemOnClickListener) {
+        this.mOnMiniDrawerItemOnClickListener = onMiniDrawerItemOnClickListener;
         return this;
     }
 
@@ -223,13 +253,23 @@ public class MiniDrawer {
         return mCrossFader;
     }
 
-    public FastAdapter.OnClickListener getOnMiniDrawerItemClickListener() {
-        return mOnMiniDrawerItemClickListener;
+
+    /**
+     * the defined FastAdapter.OnClickListener which completely replaces the original behavior
+     *
+     * @return
+     */
+    public FastAdapter.OnClickListener getOnMiniDrawerItemOnClickListener() {
+        return mOnMiniDrawerItemOnClickListener;
     }
 
+    /**
+     * @return
+     */
     public FastAdapter.OnLongClickListener getOnMiniDrawerItemLongClickListener() {
         return mOnMiniDrawerItemLongClickListener;
     }
+
 
     /**
      * generates a MiniDrawerItem from a IDrawerItem
@@ -298,6 +338,7 @@ public class MiniDrawer {
         mAdapter = new FastItemAdapter<>();
         mAdapter.withSelectable(true);
         mAdapter.withAllowDeselection(false);
+        mAdapter.withPositionBasedStateManagement(mPositionBasedStateManagement);
         mRecyclerView.setAdapter(mAdapter);
 
         //if the activity with the drawer should be fullscreen add the padding for the statusbar
@@ -415,13 +456,16 @@ public class MiniDrawer {
             if (getDrawerItems() != null) {
                 //migrate to miniDrawerItems
                 int length = getDrawerItems().size();
+
+                int position = 0;
                 for (int i = 0; i < length; i++) {
                     IDrawerItem miniDrawerItem = generateMiniDrawerItem(getDrawerItems().get(i));
                     if (miniDrawerItem != null) {
                         if (miniDrawerItem.isSelected()) {
-                            select = i;
+                            select = position;
                         }
                         mAdapter.add(miniDrawerItem);
+                        position = position + 1;
                     }
                 }
 
@@ -433,13 +477,19 @@ public class MiniDrawer {
         }
 
         //listener
-        if (mOnMiniDrawerItemClickListener != null) {
-            mAdapter.withOnClickListener(mOnMiniDrawerItemClickListener);
+        if (mOnMiniDrawerItemOnClickListener != null) {
+            mAdapter.withOnClickListener(mOnMiniDrawerItemOnClickListener);
         } else {
             mAdapter.withOnClickListener(new FastAdapter.OnClickListener<IDrawerItem>() {
                 @Override
                 public boolean onClick(View v, IAdapter<IDrawerItem> adapter, final IDrawerItem item, final int position) {
                     int type = getMiniDrawerType(item);
+
+                    //if a listener is defined and we consume the event return
+                    if (mOnMiniDrawerItemClickListener != null && mOnMiniDrawerItemClickListener.onItemClick(v, position, item, type)) {
+                        return false;
+                    }
+
                     if (type == ITEM) {
                         //fire the onClickListener also if the specific drawerItem is not Selectable
                         if (item.isSelectable()) {
@@ -478,5 +528,17 @@ public class MiniDrawer {
      */
     private List<IDrawerItem> getDrawerItems() {
         return mDrawer.getOriginalDrawerItems() != null ? mDrawer.getOriginalDrawerItems() : mDrawer.getDrawerItems();
+    }
+
+
+    public interface OnMiniDrawerItemClickListener {
+        /**
+         * @param view
+         * @param position
+         * @param drawerItem
+         * @param type       either MiniDrawer.PROFILE or MiniDrawer.ITEM
+         * @return true if the event was consumed
+         */
+        boolean onItemClick(View view, int position, IDrawerItem drawerItem, int type);
     }
 }
